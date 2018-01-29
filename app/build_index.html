@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+<head>
+  <title>美居云菜谱</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+  <!-- <script src="https://as.alipayobjects.com/g/component/fastclick/1.0.6/fastclick.js"></script> -->
+  <script src="./fastclick.js"></script>
+  <script>
+    if ('addEventListener' in document) {
+      document.addEventListener('DOMContentLoaded', function() {
+        FastClick.attach(document.body);
+      }, false);
+    }
+    if(!window.Promise) {
+      document.writeln('<script src="https://as.alipayobjects.com/g/component/es6-promise/3.2.2/es6-promise.min.js"'+'>'+'<'+'/'+'script>');
+    }
+  </script>
+   <style>
+     .position {
+       position: absolute;
+       width: 100%;
+       height: 100%;
+       top: 0;
+       left: 0;
+       z-index: 600;
+     }
+     .modelcase {
+       display: block;
+       background-color: rgba(0,0,0,.6);
+     }
+     .alertloading {
+       /*background: url("https://img.alicdn.com/imgextra/i3/1043828522/TB2x1obXZCO.eBjSZFzXXaRiVXa_!!1043828522.gif") no-repeat center center/5rem;*/
+       width: 100%;
+       height: 100%;
+       position: fixed;
+       top: 0;
+       left: 0;
+
+     }
+   </style>
+   <link rel="stylesheet" href="./index.css">
+    <script>
+      //声明_czc对象:
+      var _czc = _czc || [];
+      //绑定siteid，请用您的siteid替换下方"XXXXXXXX"部分
+      _czc.push(["_setAccount", "1263184565"]);
+    </script>
+</head>
+<body>
+    <!-- loading -->
+    <div class="alertloading modelcase position" id="alertloading" style="display:none">
+      <div class="spinner spinner_model">
+        <div class="spinner-container container1">
+          <div class="circle1 _circle"></div>
+          <div class="circle2 _circle"></div>
+          <div class="circle3 _circle"></div>
+          <div class="circle4 _circle"></div>
+        </div>
+        <div class="spinner-container container2">
+          <div class="circle1 _circle"></div>
+          <div class="circle2 _circle"></div>
+          <div class="circle3 _circle"></div>
+          <div class="circle4 _circle"></div>
+        </div>
+        <div class="spinner-container container3">
+          <div class="circle1 _circle"></div>
+          <div class="circle2 _circle"></div>
+          <div class="circle3 _circle"></div>
+          <div class="circle4 _circle"></div>
+        </div>
+      </div>
+    </div>
+    <div id="app-root"></div>
+
+    <!-- <script src='http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js' charset='utf-8'></script>
+    <script src="https://as.alipayobjects.com/g/component/??react/15.3.2/react.min.js,react/15.3.2/react-dom.min.js"></script> -->
+    <script src="./jquery.min.js"></script>
+    <script src="./react_react-dom.js"></script>
+
+    <!-- 美居app底层接口 -->
+    <script type="text/javascript">
+      var u = navigator.userAgent;
+      var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+      var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+      if(isAndroid){
+        document.write("<script src='./Android-iosbridge.js'><\/script>");
+      }else{
+        document.write("<script src='./iOS-iosbridge.js'><\/script>");
+      }
+    </script>
+    <!-- <script src="./build_js/iosbridge.js"></script> -->
+    <script src="./base.js"></script>
+    <script src="http://iot3.midea.com.cn/cloudapp/lib_6476179151065/SKmd5_1.0.js"></script>
+    <script src="http://iot3.midea.com.cn/cloudapp/lib_6476179151065/SKapi_1.0.js"></script>
+    <script src="./commonAndServerapi.js" charset="utf-8"></script>
+    <script src="./common.js"></script>
+    <script src="./index.js"></script>
+
+    <script type="text/javascript">
+      $(document).ready(function(){//头部样式兼容安卓 ios
+        var u = navigator.userAgent;
+        var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+        var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+        // if(isAndroid){
+        //   $('#app-root').addClass('andriod_header');
+        // };
+      })
+    </script>
+
+  <div class="fault_mask" style="display:none">
+    <div data-reactroot="">
+      <div class="am-modal-mask"></div>
+      <div tabindex="-1" class="am-modal-wrap " role="dialog">
+        <div role="document" class="am-modal am-modal-transparent" style="width: 286px; height: auto;">
+          <div class="am-modal-content">
+            <div class="am-modal-body">
+              <div class="">
+                <div></div>
+                <div style="height:130px">
+                  <div class="showbox_title">
+                    <img className="warn_showbox_icon" width="35" src="https://img.alicdn.com/imgextra/i2/1043828522/TB2oekeX9OI.eBjy1zkXXadxFXa_!!1043828522.png"
+                      style="position:relative;top:7px" />故障提示</div>
+                  <div class="showbox_content"></div>
+                </div>
+                <div></div>
+              </div>
+            </div>
+          </div>
+          <div tabindex="0" style="width: 0px; height: 0px; overflow: hidden;">sentinel</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- 友盟统计 -->
+    <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan style='position:fixed;visibility: hidden;' id='cnzz_stat_icon_1263184565'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s22.cnzz.com/z_stat.php%3Fid%3D1263184565%26show%3Dpic1' type='text/javascript'%3E%3C/script%3E"));</script>
+</body>
+</html>
