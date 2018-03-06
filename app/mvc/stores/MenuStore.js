@@ -1,6 +1,8 @@
 
 import actions from '../actions/MenuAction';
 import {Toast} from 'antd-mobile';
+const _url = 'https://iot2.midea.com.cn/nutrition/v1/recipe';
+import axios from 'axios';
 
 export default Reflux.createStore({
     detailSource:{},
@@ -9,7 +11,7 @@ export default Reflux.createStore({
     listenables: [actions],
     //on开头的都是action触发后的回调函数
 
-    onDetail(DevType,recipeId){
+    onDetail(recipeId){
       console.log(this.detailCache,'detailCache');
       let self = this;
       let _record = 0;
@@ -22,40 +24,35 @@ export default Reflux.createStore({
         }
       })
       if(_record){
-        $(".model_alertloading").hide();
         return;
       }
       //获取userId
-      var DEFAULT_UID = window.localStorage.getItem("DEFAULT_UID");
       var requestData = {
         "fun":"recipeDetail",
         "recipe": recipeId,
-        "pwd":"10000",
-        "uid":DEFAULT_UID
+        "uid":1 //微信appid
       };
-      var servicePath = "/recipe";
-      console.log(requestData,'requestData');
-      SKApi.sendRequest(requestData, servicePath, DevType, function (res) {
-        if(res.error_code==0){
-            var messageBack = res.content;
-            self.detailSource = messageBack;
-            self.detailCache.push(messageBack);
-            self.trigger(self.detailSource);
-         }else{
-            console.log("出了点问题:"+res.error_code+":"+res.content);
-            self.trigger(null);
-         }
-         $(".model_alertloading").hide();
-      }.bind(this));
+      axios({
+        method: 'post',
+        url: _url,
+        data: "data="+JSON.stringify(requestData),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      }).then(function (response) {
+        let _data = response.data;
+        self.detailSource = _data;
+        self.detailCache.push(_data);
+        self.trigger(self.detailSource);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
     },
-    onDetailFavoriteHandle(DevType,recipeId,isCollect){
+    onDetailFavoriteHandle(recipeId,isCollect){
       let self = this;
       //获取userId
-      var DEFAULT_UID = window.localStorage.getItem("DEFAULT_UID");
       var requestData = {
         "recipe": recipeId,
-        "pwd":"10000",
-        "uid":DEFAULT_UID
+        "uid":1
       };
       if(isCollect=='no'){
         requestData.fun = 'addFavorite';
@@ -63,37 +60,38 @@ export default Reflux.createStore({
       if(isCollect=='yes'){
         requestData.fun = 'removeFavorite';
       }
-      var servicePath = "/recipe";
-      console.log(requestData,'requestData');
-      SKApi.sendRequest(requestData, servicePath, DevType, function (res) {
-        if(res.error_code==0){
-            var messageBack = res.content||{};
-            if(messageBack.saved=="yes"){
-              let detailSource = self.detailSource;
-              if(isCollect=='no'){
-                detailSource.recorded = "yes";
-                detailSource.recorded_people++;
-              }
-              if(isCollect=='yes'){
-                detailSource.recorded = "no";
-                detailSource.recorded_people--;
-              }
-              self.detailSource = detailSource;
-              self.trigger(self.detailSource);
-              if(isCollect=='no'){
-                Toast.info(LanguagePack.collectionSuccess, 1);
-              }
-              if(isCollect=='yes'){
-                Toast.info(LanguagePack.cancelCollectionSuccess, 1);
-              }
-            }else{
-              Toast.info(LanguagePack.collectionFailed, 1);
-            }
+      axios({
+        method: 'post',
+        url: _url,
+        data: "data="+JSON.stringify(requestData),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      }).then(function (response) {
+        var messageBack = response.data||{};
+        if(messageBack.saved=="yes"){
+          let detailSource = self.detailSource;
+          if(isCollect=='no'){
+            detailSource.recorded = "yes";
+            detailSource.recorded_people++;
+          }
+          if(isCollect=='yes'){
+            detailSource.recorded = "no";
+            detailSource.recorded_people--;
+          }
+          self.detailSource = detailSource;
+          self.trigger(self.detailSource);
+          if(isCollect=='no'){
+            Toast.info(LanguagePack.collectionSuccess, 1);
+          }
+          if(isCollect=='yes'){
+            Toast.info(LanguagePack.cancelCollectionSuccess, 1);
+          }
+        }else{
+          Toast.info(LanguagePack.collectionFailed, 1);
+        }
 
-         }else{
-            console.log("出了点问题:"+res.error_code+":"+res.content);
-            self.trigger(null);
-         }
-      }.bind(this));
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
     }
 });

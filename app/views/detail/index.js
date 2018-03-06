@@ -83,18 +83,13 @@ var Index = React.createClass({
   },
   componentDidMount: function() {
     let props = this.props;
-    $("#alertloading").hide();
-    $(".model_alertloading").hide();
     this.getDetailSource(props);
   },
   getDetailSource(nextprops) {
     let self = this;
-    let recipeId = GetUrlParams.recipeId(nextprops); //获取页面参数
-    var devType = window.localStorage.getItem("DevType");
-    self.setState({
-      devType: devType
-    });
-    MenuAction.detail(devType, recipeId);
+    let recipeId = nextprops.params.id; //获取页面参数
+    console.log(recipeId,'recipid');
+    MenuAction.detail(recipeId);
   },
   //收藏
   collectHandle(recipeId, isCollect) {
@@ -118,7 +113,7 @@ var Index = React.createClass({
       "}";
     YouMeng.count(_menu, _action); //友盟统计
 
-    MenuAction.detailFavoriteHandle(this.state.devType, recipeId, isCollect);
+    MenuAction.detailFavoriteHandle(recipeId, isCollect);
   },
   //营养块
   nutritionFn(nutrition, state_nutrition) {
@@ -243,7 +238,7 @@ var Index = React.createClass({
   },
   linkTo(recipeId, which_link) {
     //跳评论页
-    hashHistory.push("/" + which_link + "?recipeId=" + recipeId);
+    hashHistory.push("/" + which_link + "/" + recipeId);
   },
   showCrossScreen() {
     this.setState({
@@ -272,7 +267,7 @@ var Index = React.createClass({
       <NavBar
         title={detailSource.name}
         navLeft={{ icon: "left", dec: LanguagePack.return }}
-        navRight={{ icon: "search", link: "search" }}
+        navRight={{ icon: "", link: "search" }}
       />
     );
     console.log(detailSource, "detailSource");
@@ -288,7 +283,7 @@ var Index = React.createClass({
                   </span>
                   <span className="md-dec-number"> 0</span>
                 </span>
-                <span className="star-icon-f18">
+                {/* <span className="star-icon-f18">
                   <span className="_icon share" /> <span style={{ fontSize: "14px", position: "relative", top: "-2px" }}>
                     {LanguagePack.share}
                   </span>
@@ -297,7 +292,7 @@ var Index = React.createClass({
                   <span className="_icon message" /> <span className="md-dec-number">
                     0
                   </span>
-                </span>
+                </span> */}
               </Flex>
             </div>
             <Loading />
@@ -328,15 +323,6 @@ var Index = React.createClass({
       _heart = "hearto";
     }
 
-    let _nav_bottom = this.state.devType ? (
-      <StatusNavBottom
-        detailSource={detailSource}
-        page={"detail"}
-        totalbytectrl={detailSource.totalbytectrl}
-        devType={this.state.devType}
-      />
-    ) : null;
-
     let buy_arr = []; //购买菜单
     let _step_length = steps.length;
 
@@ -355,7 +341,7 @@ var Index = React.createClass({
           }}
         >
           {_navbar}
-          <div className="tags-section detail">
+          {/* <div className="tags-section detail">
             <Flex justify="between">
               <span
                 className="star-icon-f20"
@@ -401,10 +387,29 @@ var Index = React.createClass({
                 </span>
               </span>
             </Flex>
-          </div>
+          </div> */}
         </div>
-        <div className="_content_detail pd-70">
+        <div className="_content_detail">
           <div className="detail-video-section">
+            <span
+                className="star-icon-f20 collect_icon"
+                onClick={self.collectHandle.bind(
+                  null,
+                  detailSource.id,
+                  detailSource.recorded
+                )}
+              >
+                <span className={recorded_col}>
+                  <span
+                    className={"_icon " + _heart}
+                    style={{ position: "relative", top: "1px" }}
+                  />
+                </span>
+                <span className="md-dec-number">
+                  {" "}
+                  {detailSource.recorded_people}
+                </span>
+              </span>
             {detailSource.hasVideo ? (
               <div className="_video_content">
                 {/*<video controls muted poster="http://121.41.75.163:8000/source/image/20161015/1476501528861oph5_x.jpg">
@@ -567,7 +572,6 @@ var Index = React.createClass({
             if (byte20.length > 0) {
               _num_record++;
             }
-            console.log(_num_record, "_num_record");
 
             return (
               <div className="detail-list no-padding">
@@ -624,7 +628,6 @@ var Index = React.createClass({
             </div>
           ) : null}
         </div>
-        {_nav_bottom}
       </div>
     );
   },

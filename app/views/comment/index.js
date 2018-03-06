@@ -3,6 +3,8 @@ import { Tabs, Flex} from 'antd-mobile';
 //该页面的样式
 import "./index.less";
 import CommentCardList from '../../components/common/commentCardList';
+import CommentAction from "../../mvc/actions/CommentAction";
+import CommentStore from "../../mvc/stores/CommentStore";
 
 
 var Index = React.createClass({
@@ -21,7 +23,8 @@ var Index = React.createClass({
       this.fetch(props);
     },
     fetch(nextprops){
-      let recipeId = GetUrlParams.recipeId(nextprops); //获取页面参数
+      let recipeId = nextprops.params.id; //获取页面参数
+      
       recipeCommentCount(recipeId, this.getRecipeCommentCount); //评论数
       recipeCommentList(recipeId, 1, this.getRecipeCommentList); //评论列表
     },

@@ -4,17 +4,17 @@ const _url = 'https://iot2.midea.com.cn/nutrition/v1/recipe';
 import axios from 'axios';
 
 export default Reflux.createStore({
-    items:{sourceList:[],resultList:[],isEnd:false,isResultEnd:false},
+    items:{sourceList:[],categoryList:[],themeList:[],isEnd:false,categoryValue:"",searchName:"",nothing:false},
     recommendCache: [],
     scoreCache: [],
     collectCache: [],
     resultCache:[],
     addPage: 0,
-    tabActive: 0,
     //监听所有的actions
     listenables: [actions],
     //on开头的都是action触发后的回调函数
-    onGetAll(scroll_type) {
+    onGetAll(scroll_type,dataItem,searchName) {
+      var request_str;
       if(scroll_type=='init'||scroll_type=='clickInit'){ //假如初始化数据，点击tab加载数据
         var _page = '1,10';
         this.addPage = 10;
@@ -25,127 +25,85 @@ export default Reflux.createStore({
       }
         //更新状态（就是个对象）
         let self = this;
-        var request_str = {"fun": "recommendList2","page":"1,10","category":"",name:""};
-        console.log(typeof request_str);      
-
-        //获取userId
-        //var requestData = {"data": request_str};
-        // var servicePath = "/recipe";
-        // if(scroll_type=='init'){
-        //   self.recommendCache = [];
-        // }
-        // if(scroll_type=='clickInit'){
-        //   self.items.sourceList = self.recommendCache;
-        //   self.items.isEnd = false;
-        //   self.trigger(self.items);
-        //   return;
-        // }
+        if(dataItem=="新品推荐"){
+          dataItem = "";
+        }
+        if(dataItem=="我的收藏"){
+          request_str = {fun: "favoriteList2",page:_page,uid:1};
+        }else{
+          request_str = {fun: "recommendList2",page:_page,category:dataItem,name:searchName,uid:1};        
+        }
         axios({
           method: 'post',
           url: _url,
           data: "data="+JSON.stringify(request_str),
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        }).then(function (response) {
+          let _data = response.data;
+          self.items.categoryValue = dataItem;
+
+          if(scroll_type=='init'||scroll_type=='clickInit'){
+            if(_data.list.length<=0){
+              self.items.nothing = true;
+            }else{
+              self.items.nothing = false;
+            }
+            self.items.sourceList = [];
+            self.items.sourceList = _data.list;
+          }
+          if(scroll_type=='loading'){
+            let newSourceList = [];
+            let sourceList = self.items.sourceList;
+            newSourceList = sourceList.concat(_data.list);
+            self.items.sourceList = newSourceList;
+          }
+          
+          self.trigger(self.items);
+        })
+        .catch(function (error) {
+          console.log(error);
         });
     },
-    onFavoriteHandle(DevType,recipeId,isCollect,detailItem){
+    onGetAllCategory(){
+        let self = this;
+        var request_str = {fun: "searchCategory4"};
+        axios({
+          method: 'post',
+          url: _url,
+          data: "data="+JSON.stringify(request_str),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        }).then(function (response) {
+          let _data = response.data;
+          let categoryList =  _data.category;
+          categoryList.forEach((item,key)=>{
+            item.isCategoryActive = false;
+          })
+          let _categoryList = [{key: "我的收藏", value: "我的收藏",isCategoryActive: false},{key: "新品推荐", value: "新品推荐",isCategoryActive: true}];
+          let newCategoryList = _categoryList.concat(categoryList);
+          
+          self.items.categoryList = newCategoryList;
+          self.trigger(self.items);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    },
+    onGetTheme(){
       let self = this;
-      //获取userId
-      var DEFAULT_UID = window.localStorage.getItem("DEFAULT_UID");
-      var requestData = {
-        "recipe": recipeId,
-        "pwd":"10000",
-        "uid":DEFAULT_UID
-      };
-      if(isCollect==0){
-        requestData.fun = 'addFavorite';
-      }
-      if(isCollect==1){
-        requestData.fun = 'removeFavorite';
-      }
-      var servicePath = "/recipe";
-      console.log(isCollect,'isCollect',requestData,'requestData');
-      SKApi.sendRequest(requestData, servicePath, DevType, function (res) {
-        if(res.error_code==0){
-            var messageBack = res.content||{};
-            if(messageBack.saved=="yes"){
+      var request_str = {fun: "theme",platform:"artcook"};
+      axios({
+        method: 'post',
+        url: _url,
+        data: "data="+JSON.stringify(request_str),
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      }).then(function (response) {
+        let _data = response.data;
+        self.items.themeList = _data.list;
+        self.trigger(self.items);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
 
-              self.recommendCache.forEach((item,key)=>{
-                if(item.recipe==recipeId){
-                  if(isCollect==0){
-                    item.isCollect = 1;
-                    item.collectTime = item.collectTime+1;
-                    //list.push(detailItem);
-                  }
-                  if(isCollect==1){
-                    item.isCollect = 0;
-                    item.collectTime = item.collectTime-1;
-                    //list.splice(key,1);
-                  }
-                }
-              })
-              self.scoreCache.forEach((item,key)=>{
-                if(item.recipe==recipeId){
-                  if(isCollect==0){
-                    item.isCollect = 1;
-                    item.collectTime = item.collectTime+1;
-                    // if(self.tabActive==3){
-                    //   self.scoreCache.push(detailItem);
-                    // }
-                  }
-                  if(isCollect==1){
-                    item.isCollect = 0;
-                    item.collectTime = item.collectTime-1;
-                    // if(self.tabActive==3){
-                    //   self.scoreCache.splice(key,1);
-                    // }
-                  }
-                }
-              })
-              self.collectCache.forEach((item,key)=>{
-                if(item.recipe==recipeId){
-                  if(isCollect==0){
-                    item.isCollect = 1;
-                    item.collectTime = item.collectTime+1;
-                    //self.collectCache.push(detailItem);
-                  }
-                  if(isCollect==1){
-                    item.isCollect = 0;
-                    item.collectTime = item.collectTime-1;
-                    self.collectCache.splice(key,1);
-                  }
-                }
-              })
-              if(isCollect==0){
-                self.collectCache.push(detailItem);
-              }
-
-              let list = [];
-              if(self.tabActive==0){
-                list = self.recommendCache;
-              }
-              if(self.tabActive==1){
-                list = self.scoreCache;
-              }
-              if(self.tabActive==2){
-                list = self.collectCache;
-              }
-              self.items.sourceList = list;
-              self.trigger(self.items);
-              if(isCollect==0){
-                Toast.info(LanguagePack.collectionSuccess, 1);
-              }
-              if(isCollect==1){
-                Toast.info(LanguagePack.cancelCollectionSuccess, 1);
-              }
-
-            }else{
-              Toast.info(LanguagePack.collectionFailed, 1);
-            }
-
-         }else{
-            console.log("出了点问题:"+res.error_code+":"+res.content);
-            self.trigger(null);
-         }
-      }.bind(this));
-    }
 });

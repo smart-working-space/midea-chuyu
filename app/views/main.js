@@ -1,5 +1,4 @@
 import "../css/index.less";
-import "../css/sui.css";
 var Main = React.createClass({
     render: function () {
         return (

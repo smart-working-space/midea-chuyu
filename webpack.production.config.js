@@ -88,7 +88,7 @@ module.exports = {
     "react-dom": "ReactDOM"
   },
   plugins: [
-    // new CleanWebpackPlugin(['dist']),
+    // new CleanWebpackPlugin(['dist'],{verbose:true}),
     new webpack.optimize.ModuleConcatenationPlugin(),
     // new webpack.optimize.CommonsChunkPlugin('shared.js'),
     new webpack.optimize.CommonsChunkPlugin({

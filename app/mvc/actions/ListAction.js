@@ -1,2 +1,2 @@
 
-export default Reflux.createActions(['getAll','getResultAll','favoriteHandle']);
+export default Reflux.createActions(['getAll','getTheme','getAllCategory','favoriteHandle']);

@@ -2,7 +2,7 @@ const path = require('path')
 const webpack = require('webpack')
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const autoprefixer = require('autoprefixer');
-const pxtorem = require('postcss-pxtorem');
+// const pxtorem = require('postcss-pxtorem');
 
 const Visualizer = require('webpack-visualizer-plugin'); // remove it in production environment.
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin; // remove it in production environment.
@@ -32,6 +32,13 @@ module.exports = {
     inline: true,
     progress: true,
     contentBase: './app',
+    proxy: {//设置反向代理
+      '/api/*': {
+          target: 'http://localhost:9092',
+          secure: false,
+          changeOrigin: true,
+      }
+    }
   },
 
   entry: { "index": path.resolve(__dirname, 'app/enter') },
