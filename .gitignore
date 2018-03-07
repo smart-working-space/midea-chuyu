@@ -6,3 +6,4 @@ build.zip
 yarn.lock
 dist/
 .vscode
+yarn-error.log

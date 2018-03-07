@@ -19,17 +19,39 @@ var Index = React.createClass({
       down: true,
       newCategoryList:[],
       slideIndex: 0,
-      value:""
+      value:"",
+
+      positionTop: '212px',
     };
   },
 
   componentDidMount: function() {
     // $("#alertloading").show();
+    let self = this;
     const hei = this.state.height - ReactDOM.findDOMNode(this.ptr).offsetTop;
     setTimeout(() => this.setState({
       height: hei
     }), 0);
     this.fetch();
+
+    var isScoll  = false;
+    $('.pull_refresh').scroll(function(){
+       var scrollTop = $(this).scrollTop();
+       if(scrollTop>=60){
+         $('.back_top').show();
+       }else{
+        $('.back_top').hide();
+       }
+    })
+
+    $('.back_top').click(function(){
+      $(".pull_refresh").animate({"scrollTop":0})
+    })
+  },
+  componentDidUpdate: function(){
+    var left_tags = $('.left_tags').height();
+    $('.content_section').css({minHeight:left_tags});
+
   },
   fetch() {
     ListAction.getTheme();    
@@ -37,6 +59,7 @@ var Index = React.createClass({
     ListAction.getAll('init','','');
   },
   categoryClick(item){
+    $(".pull_refresh").animate({"scrollTop":0})
     let {listData} = this.state;
     let categoryList=listData.categoryList;
     categoryList.forEach((_item,key)=>{
@@ -122,73 +145,80 @@ var Index = React.createClass({
       )
     }
     return(
-        <div className="whole-page">
-          <div className="search_section">
-            <Carousel className="space-carousel"
-              autoplay={false}
-              infinite
-              selectedIndex={1}
-            >
-              {themeList.map((item, index) => (
+      <div>
+          <div className="back_top">&uarr;</div>
+        <PullToRefresh
+                className="pull_refresh"
+                ref={el => this.ptr = el}
+                style={{
+                  height: this.state.height,
+                  overflow: "auto"
+                }}
+                distanceToRefresh={55}
+                indicator={this.state.down ? { deactivate: "上拉可以刷新" } : {}}
+                direction={this.state.down ? "up" : "down"}
+                refreshing={this.state.refreshing}
+                onRefresh={() => {
+                  this.handleAction();
+                }}
+              >  
+          <div className="whole-page">
+            <div className="search_section">
+              <Carousel className="space-carousel"
+                autoplay={false}
+                infinite
+                selectedIndex={1}
+              >
+                {themeList.map((item, index) => (
+                
+                    <img
+                      className="slideImg"
+                      src={item.picUrl}
+                      alt=""
+                      style={{ width: '100%', verticalAlign: 'top' }}
+                      onLoad={() => {
+                        // fire window resize event to change height
+                        window.dispatchEvent(new Event('resize'));
+                        this.setState({ imgHeight: 'auto' });
+                      }}
+                      onClick={self.linkTo.bind(null,item.recipe)}
+                    />
+                
+                ))}
+              </Carousel>
+              <div className="search_input"><SearchBar placeholder="请输入菜谱名" maxLength={8} onSubmit={self.submitData} onClear={self.cancelClick} /></div>
+            </div>
+            <div className="main_section">
+              <Flex justify="between" align="start">
+                <div className="left_tags">
+                    <div className="category_section">
+                    {
+                        categoryList.map((item,key)=>{
+                          let isCategoryActive = '';
+                          if(item.isCategoryActive){
+                            isCategoryActive = 'category_active';
+                          }
+                          return (
+                            <div className={"category_list "+isCategoryActive} key={key} onClick={self.categoryClick.bind(null,item)}>{item.value}</div>                        
+                          )
+                        })
+                    }
+                    </div>
+                </div>
+                <div className="right_content"> 
               
-                  <img
-                    src={item.picUrl}
-                    alt=""
-                    style={{ width: '100%', verticalAlign: 'top',height:'100px' }}
-                    onLoad={() => {
-                      // fire window resize event to change height
-                      window.dispatchEvent(new Event('resize'));
-                      this.setState({ imgHeight: 'auto' });
-                    }}
-                    onClick={self.linkTo.bind(null,item.recipe)}
-                  />
+                    {showNode}  
+                </div>
+              </Flex>
               
-              ))}
-            </Carousel>
-            <SearchBar placeholder="请输入菜谱名" maxLength={8} onSubmit={self.submitData} onClear={self.cancelClick} />
+              
+            </div>
+          
+            {this.props.children}
           </div>
-          <div className="main_section">
-            <Flex justify="between" align="start">
-              <div className="left_tags">
-                  <div className="category_section">
-                  {
-                      categoryList.map((item,key)=>{
-                        let isCategoryActive = '';
-                        if(item.isCategoryActive){
-                          isCategoryActive = 'category_active';
-                        }
-                        return (
-                          <div className={"category_list "+isCategoryActive} key={key} onClick={self.categoryClick.bind(null,item)}>{item.value}</div>                        
-                        )
-                      })
-                  }
-                  </div>
-              </div>
-              <div className="right_content">
-                <PullToRefresh
-                  className="pull_refresh"
-                  ref={el => this.ptr = el}
-                  style={{
-                    height: this.state.height,
-                    overflow: "auto"
-                  }}
-                  distanceToRefresh={55}
-                  indicator={this.state.down ? { deactivate: "上拉可以刷新" } : {}}
-                  direction={this.state.down ? "up" : "down"}
-                  refreshing={this.state.refreshing}
-                  onRefresh={() => {
-                    this.handleAction();
-                  }}
-                >
-                  {showNode}
-                </PullToRefresh>
-                 
-              </div>
-            </Flex>
-          </div>
-         
-          {this.props.children}
-        </div>
+        </PullToRefresh>
+        
+       </div>
       )
   }
 });
