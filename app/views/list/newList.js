@@ -29,6 +29,7 @@ var Index = React.createClass({
     // $("#alertloading").show();
     let self = this;
     const hei = this.state.height - ReactDOM.findDOMNode(this.ptr).offsetTop;
+    console.log(hei,'elm',this.state.height);
     setTimeout(() => this.setState({
       height: hei
     }), 0);
@@ -36,10 +37,14 @@ var Index = React.createClass({
 
     var isScoll  = false;
     $('.pull_refresh').scroll(function(){
+      var slideImgHeight = $('.slideImg').height();
        var scrollTop = $(this).scrollTop();
+      //  console.log(scrollTop);
        if(scrollTop>=60){
+         $('.search_section').css({marginTop:'-'+slideImgHeight+'px'});
          $('.back_top').show();
        }else{
+        $('.search_section').css({marginTop:'0px'});
         $('.back_top').hide();
        }
     })
@@ -114,6 +119,7 @@ var Index = React.createClass({
     console.log(listData,'listdata');
     let themeList = listData.themeList;
     let categoryList=listData.categoryList;
+    categoryList.length = 9;
     let sourceList = listData.sourceList;
     let showNode = null;
     if(listData.nothing){
@@ -147,21 +153,7 @@ var Index = React.createClass({
     return(
       <div>
           <div className="back_top">&uarr;</div>
-        <PullToRefresh
-                className="pull_refresh"
-                ref={el => this.ptr = el}
-                style={{
-                  height: this.state.height,
-                  overflow: "auto"
-                }}
-                distanceToRefresh={55}
-                indicator={this.state.down ? { deactivate: "上拉可以刷新" } : {}}
-                direction={this.state.down ? "up" : "down"}
-                refreshing={this.state.refreshing}
-                onRefresh={() => {
-                  this.handleAction();
-                }}
-              >  
+      
           <div className="whole-page">
             <div className="search_section">
               <Carousel className="space-carousel"
@@ -205,9 +197,26 @@ var Index = React.createClass({
                     }
                     </div>
                 </div>
+
                 <div className="right_content"> 
-              
+                  <PullToRefresh
+                  className="pull_refresh"
+                  ref={el => this.ptr = el}
+                  style={{
+                    height: this.state.height,
+                    overflow: "auto"
+                  }}
+                  distanceToRefresh={55}
+                  indicator={this.state.down ? { deactivate: "上拉可以刷新" } : {}}
+                  direction={this.state.down ? "up" : "down"}
+                  refreshing={this.state.refreshing}
+                  onRefresh={() => {
+                    this.handleAction();
+                  }}
+                >  
                     {showNode}  
+                 </PullToRefresh>
+                    
                 </div>
               </Flex>
               
@@ -216,7 +225,6 @@ var Index = React.createClass({
           
             {this.props.children}
           </div>
-        </PullToRefresh>
         
        </div>
       )
