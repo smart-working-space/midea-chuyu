@@ -119,7 +119,7 @@ var Index = React.createClass({
     console.log(listData,'listdata');
     let themeList = listData.themeList;
     let categoryList=listData.categoryList;
-    categoryList.length = 9;
+    categoryList.length = 8;
     let sourceList = listData.sourceList;
     let showNode = null;
     if(listData.nothing){
